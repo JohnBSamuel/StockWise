@@ -348,16 +348,19 @@ def signup():
         CTkEntry(master=frame, placeholder_text="Initial Balance")
     ]
     
-    for i, field in enumerate(fields):
-        field.place(x=30, y=60 + 40*i)
-    
-    CTkButton(master=frame, text="Sign Up", command=lambda: validate_inputs(
-        fields[0].get(), fields[1].get(), fields[2].get(),
-        fields[3].get(), fields[4].get(), fields[5].get(),
-        fields[6].get()) and AddUser(*[f.get() for f in fields[:5], fields[6].get())
-    ).place(x=30, y=335)
-    
-    CTkButton(master=frame, text="Back", command=backfnc, hover_color="orange").place(x=30, y=370)
+for i, field in enumerate(fields):
+    field.place(x=30, y=60 + 40 * i)
+
+CTkButton(
+    master=frame,
+    text="Sign Up",
+    command=lambda: validate_inputs(
+        *[f.get() for f in fields]
+    ) and AddUser(*([f.get() for f in fields[:5]] + [fields[6].get()])),
+).place(x=30, y=335)
+
+CTkButton(master=frame, text="Back", command=backfnc, hover_color="orange").place(x=30, y=370)
+
 
 def page1():
     global frame, img_label, wallet_frame, port, stock_frame
