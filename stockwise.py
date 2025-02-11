@@ -1,10 +1,13 @@
 import decimal
 import re
+import os
 import sys
 from tkinter import messagebox
 import mysql.connector
 from PIL import Image
 from customtkinter import *
+
+
 
 print("""
 System Started...
@@ -23,25 +26,34 @@ port = CTkFrame(master=app)
 stock_frame = CTkFrame(master=app)
 
 def connect_to_database():
+    credentials_path = "/Users/johnsamuel/Desktop/StockWise/database_credentials.txt"  # Full path
+
+    print(f"Checking for database credentials at: {credentials_path}")  # Debugging print
+
     try:
-        with open("database_credentials.txt", "r") as file:
+        with open(credentials_path, "r") as file:
             lines = file.readlines()
             credentials = {}
             for line in lines:
                 key, value = line.strip().split(": ")
                 credentials[key] = value
-            return mysql.connector.connect(
-                host=credentials["Host"],
-                user=credentials["User"],
-                password=credentials["Password"],
-                database=credentials["Database"]
-            )
+
+        print("Database credentials loaded successfully!")  # Debugging print
+
+        return mysql.connector.connect(
+            host=credentials["Host"],
+            user=credentials["User"],
+            password=credentials["Password"],
+            database=credentials["Database"]
+        )
+
     except FileNotFoundError:
-        print("Database credentials file not found.")
+        print("❌ Database credentials file not found. Make sure it exists at the correct location.")
         sys.exit()
     except Exception as e:
-        print(f"Failed to connect to the database: {str(e)}")
+        print(f"⚠️ Failed to connect to the database: {str(e)}")
         sys.exit()
+
 
 connection = connect_to_database()
 cursor = connection.cursor()
@@ -348,20 +360,64 @@ def signup():
         CTkEntry(master=frame, placeholder_text="Initial Balance")
     ]
     
-for i, field in enumerate(fields):
-    field.place(x=30, y=60 + 40 * i)
+    for i, field in enumerate(fields):
+      field.place(x=30, y=60 + 40 * i)
 
-CTkButton(
-    master=frame,
-    text="Sign Up",
-    command=lambda: validate_inputs(
+    CTkButton(master=frame,text="Sign Up",command=lambda: validate_inputs(
         *[f.get() for f in fields]
     ) and AddUser(*([f.get() for f in fields[:5]] + [fields[6].get()])),
 ).place(x=30, y=335)
 
 CTkButton(master=frame, text="Back", command=backfnc, hover_color="orange").place(x=30, y=370)
 
+def page1():
+    global frame, img_label, wallet_frame, port, stock_frame
+    
+    try:
+        frame.destroy()
+        img_label.destroy()
+        wallet_frame.destroy()
+        port.destroy()
+        stock_frame.destroy()
+    except NameError:
+        pass  # Ignore if these variables are not yet defined
+    
+    img = CTkImage(Image.open("./images/login.jpg"), size=(300, 400))
+    img_label = CTkLabel(master=app, image=img, text="")
+    img_label.grid(row=0, column=0)
+    
+    frame = CTkFrame(master=app, width=200, height=400)
+    frame.grid(row=0, column=1)
+    
+    img_logo = CTkImage(Image.open("./images/logo.png"), size=(50, 50))
+    logo = CTkLabel(master=frame, image=img_logo, text="")
+    logo.place(x=15, y=10)
+    
+    name = CTkLabel(master=frame, text="StockUp", font=("Roboto", 24))
+    name.place(x=65, y=20)
+    
+    l_img = CTkImage(Image.open("./images/loginImg.png"), size=(21, 21))
+    login_button = CTkButton(master=frame, text=" Login ", command=login, image=l_img)
+    login_button.place(x=30, y=140)
+    
+    s_img = CTkImage(Image.open("./images/signup.png"), size=(25, 21))
+    sign_btn = CTkButton(master=frame, text="Sign-Up", command=signup, image=s_img)
+    sign_btn.place(x=30, y=180)
+    
+    close_btn = CTkButton(master=frame, text="Close App", command=close, fg_color="green", hover_color="red")
+    close_btn.place(x=30, y=230)
+    
+    t = CTkImage(dark_image=Image.open("./images/dark.png"), light_image=Image.open("./images/light.png"), size=(66, 34))
+    theme = CTkButton(master=frame, text="", hover=False, width=66, height=34, image=t, fg_color="transparent", command=change_theme)
+    theme.place(x=60, y=270)
 
+# Initialize the app
+app = CTk()
+
+page1()
+app.mainloop()
+
+print("\nApp Closed...\n")
 def page1():
     global frame, img_label, wallet_frame, port, stock_frame
     
